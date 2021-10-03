@@ -6,9 +6,15 @@
 package di_t1a1_ap42_ej4colourful;
 
 
+import static java.lang.Math.random;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -18,6 +24,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 /**
  *
@@ -68,16 +75,42 @@ public class DI_T1A1_Ap42_Ej4Colourful extends Application {
         //Tanto en ancho(width) com oen alto(height)
         colors.widthProperty().bind(scene.widthProperty());
         colors.heightProperty().bind(scene.heightProperty());
-        //Añadimos colors al nodo root
-        root.getChildren().add(colors);
         
-        //Añadimos el grupo circles al grupo root.
-        root.getChildren().add(circles);
+        //El grupo siguiente, configura la estructura de mezlca de la capa
+        //El grupo cotiene dos hijos, 1. Un grupo que contiene un rectángulo negro y el grupo de circulos.
+        //                            2. El rectángulo denominado colors.
+        Group blendModeGroup = new Group(new Group(new Rectangle(scene.getWidth(), scene.getHeight(),
+                    Color.BLACK), circles), colors); 
         
+        //Aplica la mezcla de la capa del rectangulo colors. 
+        colors.setBlendMode(BlendMode.OVERLAY);
+        
+        //Añade blendModeGroup al root node
+        root.getChildren().add(blendModeGroup);
+ 
         //Damos efecto de desenfoque a los circulos
         circles.setEffect(new BoxBlur(10,10,3));
         
-   
+        //Hace una linea temporal desde 0 hasta 40
+        Timeline timeline = new Timeline();
+        //El loop añade los dos key frames para cada uno de los 30 circulos
+        for(Node circle: circles.getChildren()) {
+            //Escoge una posición random dentro de la ventana al principio.
+            timeline.getKeyFrames().addAll(
+            new KeyFrame(Duration.ZERO, //set start  position at 0
+                new KeyValue(circle.translateXProperty(), random() * 800),
+                new KeyValue(circle.translateYProperty(), random() * 600)
+            ),
+            //Este segundo KeyFrame hace lo mismo que el primero pero tras pasar 40 segundos
+            new KeyFrame(new Duration(40000), //set end position at 40s
+                    new KeyValue(circle.translateXProperty(), random() * 800),
+                    new KeyValue(circle.translateYProperty(), random() * 600)
+                )
+            );
+        }
+        //Comienza la animación
+        //play 40s of animation
+        timeline.play();
         
         //Mostramos la ventana
         primaryStage.show();
